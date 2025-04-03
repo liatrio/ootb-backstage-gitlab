@@ -8,6 +8,11 @@
 
 import { createBackend } from '@backstage/backend-defaults';
 
+import {
+    gitlabPlugin,
+    catalogPluginGitlabFillerProcessorModule,
+} from '@immobiliarelabs/backstage-plugin-gitlab-backend';
+
 const backend = createBackend();
 
 backend.add(import('@backstage/plugin-app-backend'));
@@ -51,5 +56,11 @@ backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
 // kubernetes
 backend.add(import('@backstage/plugin-kubernetes-backend'));
+
+// added the following to support the GitLab integration
+backend.add(import('@backstage/plugin-auth-backend-module-gitlab-provider'));
+
+backend.add(gitlabPlugin);
+backend.add(catalogPluginGitlabFillerProcessorModule);
 
 backend.start();

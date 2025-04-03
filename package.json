@@ -6,9 +6,9 @@
     "node": "20 || 22"
   },
   "scripts": {
-    "dev": "yarn workspaces foreach -A --include backend --include app --parallel --jobs unlimited -v -i run start",
-    "start": "yarn workspace app start",
-    "start-backend": "yarn workspace backend start",
+    "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
+    "start": "dotenv -e .env yarn workspace app start",
+    "start-backend": "dotenv -e .env yarn workspace backend start",
     "build:backend": "yarn workspace backend build",
     "build:all": "backstage-cli repo build --all",
     "build-image": "yarn workspace backend build-image",
@@ -52,5 +52,11 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@4.4.1"
+  "packageManager": "yarn@4.4.1",
+  "dependencies": {
+    "@backstage/plugin-home": "^0.8.6",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0"
+  }
 }

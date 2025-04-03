@@ -59,6 +59,11 @@ import {
   isKubernetesAvailable,
 } from '@backstage/plugin-kubernetes';
 
+import {
+    isGitlabAvailable,
+    EntityGitlabContent,
+} from '@immobiliarelabs/backstage-plugin-gitlab';
+
 const techdocsContent = (
   <EntityTechdocsContent>
     <TechDocsAddons>
@@ -188,6 +193,14 @@ const serviceEntityPage = (
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
     </EntityLayout.Route>
+
+    <EntityLayout.Route
+            if={isGitlabAvailable}
+            path="/gitlab"
+            title="Gitlab"
+        >
+        <EntityGitlabContent />
+    </EntityLayout.Route>
   </EntityLayout>
 );
 
@@ -222,6 +235,14 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route
+        if={isGitlabAvailable}
+        path="/gitlab"
+        title="Gitlab"
+    >
+        <EntityGitlabContent />
     </EntityLayout.Route>
   </EntityLayout>
 );

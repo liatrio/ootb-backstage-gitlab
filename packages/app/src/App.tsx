@@ -36,6 +36,12 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
+import { HomepageCompositionRoot } from '@backstage/plugin-home';
+import { HomePage } from './components/home/HomePage';
+
+// Added to enable GitLab authentication
+import { gitlabAuthApiRef } from '@backstage/core-plugin-api';
+
 
 const app = createApp({
   apis,
@@ -56,13 +62,33 @@ const app = createApp({
       catalogIndex: catalogPlugin.routes.catalogIndex,
     });
   },
-  components: {
-    SignInPage: props => <SignInPage {...props} auto providers={['guest']} />,
+  // Added GitLab auth provider to the app configuration
+    components: {
+    SignInPage: props => (
+      <SignInPage
+        {...props}
+        auto
+        provider={{
+          id: 'gitlab-auth-provider',
+          title: 'GitLab',
+          message: 'Sign in using GitLab',
+          apiRef: gitlabAuthApiRef,
+        }}
+      />
+    ),
   },
 });
+// Original sign in page configuration for reference
+//   components: {
+//     SignInPage: props => <SignInPage {...props} auto providers={['guest']} />,
+//   },
+// });
 
 const routes = (
   <FlatRoutes>
+    <Route path="/" element={<HomepageCompositionRoot />}>
+      <HomePage />
+    </Route>
     <Route path="/" element={<Navigate to="catalog" />} />
     <Route path="/catalog" element={<CatalogIndexPage />} />
     <Route
