@@ -1,5 +1,20 @@
 # [Backstage](https://backstage.io)
 
+Out of the Box Backstage configured for GitLab
+
+Add credentials and go!
+
+
+## What you get
+
+- A Homepage
+- Backstage App configured for GitLab integreation and authentication
+- [immobliare/backstage-plugin-gitlab](https://github.com/immobiliare/backstage-plugin-gitlab) to display GitLab stats & information for registered repositories
+
+## Purpose
+
+To get you started with the least amount of effort.
+
 ## Setup GitLab
 
 To registry repositories from a GitLab instance,
