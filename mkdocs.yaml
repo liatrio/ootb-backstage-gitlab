@@ -1,6 +1,7 @@
 site_name: "GitLab Backstage Playbook"
 docs_dir: docs
 nav:
+  - Welcome: index.md
   - GitLab Backstage Implementation: backstage-implementation-playbook.md
   - Backstage Design Document: backstage-design-document.md
 plugins:
