@@ -98,37 +98,103 @@ The goal of this phase is to get Backstage working locally to demonstrate its va
 ### Step 3: Deployment
 
 1. Follow [Kubernetes Deployment](https://backstage.io/docs/deployment/k8s) directions OR reference [argo deployment example used at a previous client](/backstage-argo-cd/)
-
+2. Define secrets for GitLab token and GitLab app registration in the deployment definition so they are available as environment variables.
 
 ### Step 4: Implement Real Examples
 
-1. **Add real components to the catalog**:
-2. **Set up templates for your organization**:
-3. **Integrate with your GitLab instance**:
+1. Set up a client relavent Domain & System
+2. Setup and test Templates
+  - template that creates MR
+  - template that create repo
+3. Setup Components that demonstrate type
+  - library
+  - website
+  - service
 
 ## Phase 3: Run - Production-Ready Configuration
+
+> This phase focuses on making Backstage production-ready with persistent storage, monitoring, and advanced features
+
 ### Step 1: Set Up Persistent Storage
-1. **Configure PostgreSQL database**:
-2. **Configure object storage for TechDocs**:
+
+1. **Configure persistent volumes for Backstage**:
+   - Set up persistent volumes for each environment (dev, qa, prod)
+   - Configure volume claims in deployment manifests
+   - Implement backup strategy for persistent volumes
+
+2. **Configure PostgreSQL database**:
+   - Set up a managed PostgreSQL instance or deploy to Kubernetes
+   - Update app-config files to use external PostgreSQL database
+   ```yaml
+   backend:
+     database:
+       client: pg
+       connection:
+         host: ${POSTGRES_HOST}
+         port: ${POSTGRES_PORT}
+         user: ${POSTGRES_USER}
+         password: ${POSTGRES_PASSWORD}
+         database: ${POSTGRES_DATABASE}
+   ```
+   - Set up database backup and recovery procedures
+
+3. **Configure object storage for TechDocs**:
+   - Set up S3-compatible storage for TechDocs
+   - Update app-config files to use external storage (untested example below)
+   > this requires that the techdocs for EVERY entity is built and published to the storage by another mechanism that is NOT Backstage
+   ```yaml
+   techdocs:
+     builder: 'external'
+     publisher:
+       type: 'awsS3'
+       awsS3:
+         bucketName: ${TECHDOCS_S3_BUCKET_NAME}
+         credentials:
+           accessKeyId: ${TECHDOCS_AWS_ACCESS_KEY_ID}
+           secretAccessKey: ${TECHDOCS_AWS_SECRET_ACCESS_KEY}
+         region: ${TECHDOCS_AWS_REGION}
+   ```
+   - Configure TechDocs to use external builder
 
 ### Step 2: Implement Monitoring and Observability
-1. **Implement logging**:
-2. **Set up metrics**:
+
+1. **Set up health checks**:
+   - Set up monitoring for these endpoints
+   - Configure alerts for health check failures
+
+2. **Set up usage metrics**:
+   - setup [analytics plugin](https://backstage.io/docs/plugins/analytics/)
 
 ### Step 3: Enhance Security
+
 1. **Implement proper secret management**:
+   - Set up Vault integration for secrets
+   - Move all secrets from configuration files to Vault
+   - Configure Backstage to retrieve secrets from Vault
+   - Implement secret rotation policies
+
 2. **Configure role-based access control**:
-  - admin groups for backstage
+   - Set up admin groups for Backstage
+     - Set up admin policy for access to write and read to specific Backstage endpoints
+   - Eliminate guest access completely
 
-### Step 4: Scale and Optimize
-
-1. **Configure horizontal scaling**:
-2. **Implement caching**:
-
-### Step 5: Advanced Features
+### Step 4: Advanced Features
 
 1. **Implement Microsoft Entra Tenant Data integration**:
-2. **Set up advanced search**:
+   - Configure the Microsoft Entra provider
+   - Set up automatic user and group synchronization
+   - Replace static user definitions with dynamic user management
+   ```yaml
+   catalog:
+     providers:
+       microsoftGraphOrg:
+         providers:
+           - target: https://graph.microsoft.com/v1.0
+             authority: https://login.microsoftonline.com
+             tenantId: ${MICROSOFT_TENANT_ID}
+             clientId: ${MICROSOFT_CLIENT_ID}
+             clientSecret: ${MICROSOFT_CLIENT_SECRET}
+   ```
 
 ## Conclusion
 
