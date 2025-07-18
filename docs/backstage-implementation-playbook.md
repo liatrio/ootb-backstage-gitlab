@@ -2,6 +2,8 @@
 
 This playbook provides a structured approach to implementing Backstage as the Internal Developer Portal (IDP). It follows a walk-crawl-run methodology to help you progressively build and enhance the Backstage instance.
 
+If at any point you have questions, need clarification, or want to contribute back to the Backstage playbook, please reach out to the [Backstage foundations channel in Slack](https://liatrio.slack.com/archives/C05MA4MMD71). No Backstage question is too small, too big, too basic, too advanced; we ALL will struggled with something in Backstage eventually. Definitely don't sit on troubleshooting for too long before doing a sanity check with someone 🆘.
+
 ## Introduction
 
 [Backstage](https://backstage.io) is an open platform for building developer portals, created by Spotify and now part of the CNCF. It provides a unified interface for all your infrastructure tooling, services, and documentation.
@@ -201,6 +203,10 @@ The goal of this phase is to get Backstage working locally to demonstrate its va
 Following this playbook will help you implement Backstage in a structured and progressive manner. Each phase builds upon the previous one, allowing you to demonstrate value early while working towards a production-ready deployment.
 
 Remember that Backstage is highly customizable, and you should adapt this playbook to your client's specific needs and constraints.
+
+## Contribute Back!
+
+As you walk through this playbook and you find any new gotchas, friction, or missing steps, please contribute back to the Backstage playbook. If you are unsure, please post in the [Backstage foundations channel](https://liatrio.slack.com/archives/C05MA4MMD71) for help, confirmation, or suggestions!
 
 ## References
 
