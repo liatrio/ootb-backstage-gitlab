@@ -1,6 +1,6 @@
 # Backstage Implementation Playbook
 
-This playbook provides a structured approach to implementing Backstage as your Internal Developer Portal (IDP). It follows a walk-crawl-run methodology to help you progressively build and enhance your Backstage instance.
+This playbook provides a structured approach to implementing Backstage as the Internal Developer Portal (IDP). It follows a walk-crawl-run methodology to help you progressively build and enhance the Backstage instance.
 
 ## Introduction
 
@@ -8,9 +8,26 @@ This playbook provides a structured approach to implementing Backstage as your I
 
 This playbook will guide you through the implementation process in three phases:
 
-1. **Crawl**: Get Backstage working locally with basic configuration
-2. **Walk**: Deploy to Kubernetes with authentication and real examples
-3. **Run**: Production-ready setup with persistent database, monitoring, and advanced features
+1. **Crawl**: `demo quick capability` Get Backstage working locally with basic configuration and capabilities and demo-able.
+2. **Walk**: `real use cases` Deploy live containerized instances with GitLab auth, guest login, Techdocs (machine built), GitLab integration, in memory db, health endpoint, defined users, and working templates.
+3. **Run**: `productionalize` Production-ready setup with persistent database, Org provider (dynamic users), Techdocs hosted on S3.
+
+> the ootb backstage in this repo only gets you to the **WALK** phase
+
+📓 **most custom config can be copied from the ootb backstage repo, but we will still explain the steps taken below
+
+## Start these conversations NOW/ASAP
+
+> these will become MUST HAVES for the implementation of live environments
+
+- how can we go about getting a dedicated dns
+  - `work around?` -- partial -- for some functionality in Backstage, it was configurable to use a prefix path on a shared domain like mycompany.com/backstage-dev, but GitLab plugin was not built to support this and there are possibly undiscovered issues with other plugins too.
+- how can we go about setting up a Azure app registration for SSO
+  - `work around?` -- yes -- keep guest access but MUST restrict access to backstage through some other means (like requiring availability over company vpn and restricting all GitLab resources to OAuth prompts) -- don't take this workaround to a production environment
+- how can we get namespaces for hosting backstage environments and access to them
+  - `work around?` -- maybe? -- backstage needs to be hosted somewhere; find out what hosting options are available
+- how can we go about getting a READ ALL reporter access token to GitLab
+  - `work around?` -- yes -- yes, use personal access token from GitLab for a user that has read access to all repos, or at least the repos you need to view -- don't take this workaround to a production environment
 
 ## Phase 1: Crawl - Local Setup and Basic Configuration
 
@@ -18,182 +35,106 @@ The goal of this phase is to get Backstage working locally to demonstrate its va
 
 ### Step 1: Set Up Development Environment
 
-1. **Install required software**:
-   - Node.js 20 (LTS/Iron)
-   ```bash
-   nvm install lts/iron
-   node --version  # Should show v20.x.x
-   ```
-   - Yarn 4.4.1
-   ```bash
-   corepack enable
-   yarn set version 4.4.1
-   yarn --version  # Should show 4.4.1
-   ```
-   - Git
-   - Podman (optional, for containerization)
+1. Fresh install of Backstage using the [official Backstage documentation](https://backstage.io/docs/getting-started)
+2. Confirm fresh install by running `yarn start` and ensuring Backstage starts successfully
 
-2. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd <repository-directory>
-   ```
+### Step 2: Configure Local Instance & Basic Capability
 
-3. **Install dependencies**:
-   ```bash
-   export BACKSTAGE_ENVIRONMENT=local
-   yarn install --immutable
-   yarn tsc
-   ```
+1. Configure local development environment
+  - update the app-config.yaml file to use $include for environment specific config (this will be important for containerization supporting multiple environments)
+  > we will use this to dynamically include config for local, dev, qa, ci, and prod environments at build and run time of the container
+  - create a app-config.local.yaml file with localhost config
+2. Setup GitLab integration
+  - add the GitLab client ID and client secret to the app-config.local.yaml file for the auth provider
+    - GitLab provider requires defined users (the catalog.create setting only works for github and google as of 7/28/25)
+    - use email resolver if you plan to later access the email address during templates executions
+  - add the GitLab token to the app-config.local.yaml file
+  - add yourself as a defined user company/gitlab-users.yaml (create the company, or name of company directory)
+    - add the email address your GitLab account is associated with
+  - add the company/gitlab-users.yaml location to app-config.local.yaml
+3. Add GitLab plugins
+  - [backstage-plugin-gitlab](https://github.com/immobiliare/backstage-plugin-gitlab)
+    - can we used with GitLab token (default) or OAuth (config change for OAuth)
+    - recommended to use OAuth configuration for this plugin
+  - [backstage-community/plugin-cicd-statistics](https://www.npmjs.com/package/@backstage-community/plugin-cicd-statistics)
+    - requires GitLab OAuth
+4. Add TechDocs plugin
+  - [backstage/plugin-techdocs](https://backstage.io/docs/features/techdocs/getting-started)
+  - chose `builder: 'local'`
+  - setup python virtual environment and install mkdocs-techdocs-core and mkdocs-mermaid2-plugin (needed to render docs on local machine)
+5. Customize Home Page & Tabs Column for User Journeys
+  - Homepage cards (use journeys)
+    - onboard new app (links to app starter kits)
+    - adopt/migrate existing app (links to templates for MRs)
+  - tabs
+    - starter kits (link to stater kit tag filtered templates)
+    - resusable shared components (link to shared component tag filtered components)
+    - onboarding guides (link to onboarding tag filtered docs)
 
-### Step 2: Configure Local Instance
+## Phase 2: Walk - Live environment(s)
 
-1. **Set up basic configuration**:
-   - Review and update `app-config.yaml` and `app-config.local.yaml` for your environment
-   - Configure the software catalog to discover your components
+> disclaimer: it is BEST to have a dedicated dns ready for the backstage app to be hosted on. Most Backstage plugins are not built anticipate a prefix path on a shared domain like mycompany.com/backstage-dev.
 
-2. **Set up TechDocs for local rendering**:
-   ```bash
-   python3 -m venv .techdocs-venv
-   source .techdocs-venv/bin/activate
-   pip install --no-cache-dir mkdocs-techdocs-core==1.* mkdocs-mermaid2-plugin
-   ```
+1. Configure [Dockerfile](https://backstage.io/docs/deployment/docker)
+  - add techdoc package installation
+  - adjust for Node development runtime
+    - update to `ENV NODE_ENV=production`
+    - update to `yarn workspaces focus --all --production && rm -rf "$(yarn cache clean)"`
 
-### Step 3: Run Backstage Locally
+2. Add a app-config.ci.yaml file (copy from local) -- this will be used for pipeline build of backstage app
 
-1. **Build and start the application**:
-   ```bash
-   yarn build:backend
-   yarn start
-   ```
+3. Build container
+  - confirm local container builds & runs successfully with app.config-ci.yaml and local auth
 
-2. **Access the local instance**:
-   - Open your browser and navigate to `http://localhost:3000`
-
-### Step 4: Explore Basic Features
-
-1. **Software Catalog**: Explore the structure and add sample components
-2. **Documentation**: Test the TechDocs functionality with sample documentation
-3. **Scaffolding**: Experiment with templates for project creation
-
-## Phase 2: Walk - Kubernetes Deployment with Authentication
-
-The goal of this phase is to deploy Backstage to Kubernetes with authentication and demonstrate its value with real examples.
-
-### Step 1: Prepare for Kubernetes Deployment
-
-1. **Create necessary namespaces**:
-   - Submit a merge request for namespace creation in your Kubernetes environment
-   - Ensure proper RBAC permissions are set up
-
-2. **Set up container registry access**:
-   - Configure access to your container registry
-   - Set up CI/CD pipeline for building and pushing container images
+4. Setup build pipeline
+  - follow the [host build directions](https://backstage.io/docs/deployment/docker#host-build) to have an app build job and then a image build job following that using the built app packages (skeleton.tar.gz and bundle.tar.gz)
 
 ### Step 2: Configure Authentication
 
-1. **Set up GitLab authentication**:
-   - Create a GitLab application for OAuth
-   - Configure client ID and secret in Backstage
-   - Update app configuration to use GitLab authentication
+1. Setup GitLab auth App for live environments, store secrets in namespaces (best if vault is used for storage and access)
+2. Complete the same for other auth providers (Microsoft, Okta, etc.) to expand access beyond just GitLab users
+  - will require an update to users file to include new non-gitlab users OR add new Org provider to create users
 
-2. **Set up Microsoft SSO (optional for Walk phase)**:
-   - Create an Azure app registration for SSO
-   - Configure client ID and secret in Backstage
-   - Update app configuration to use Microsoft authentication
+### Step 3: Deployment
 
-### Step 3: Deploy to Kubernetes
+1. Follow [Kubernetes Deployment](https://backstage.io/docs/deployment/k8s) directions OR reference [argo deployment example used at a previous client](/backstage-argo-cd/)
 
-1. **Create Kubernetes deployment configuration**:
-   - Set up Helm charts or Kubernetes manifests
-   - Configure environment-specific values (dev, qa)
-
-2. **Deploy using ArgoCD or similar tool**:
-   - Set up ArgoCD application
-   - Configure sync policy and health checks
-
-3. **Configure ingress and domain**:
-   - Set up ingress controller
-   - Configure domain and TLS certificates
 
 ### Step 4: Implement Real Examples
 
 1. **Add real components to the catalog**:
-   - Add `catalog-info.yaml` files to your repositories
-   - Configure automatic discovery of components
-
 2. **Set up templates for your organization**:
-   - Create custom templates for your projects
-   - Configure template actions for your CI/CD system
-
 3. **Integrate with your GitLab instance**:
-   - Configure GitLab integration for repository browsing
-   - Set up pipeline statistics visualization
 
 ## Phase 3: Run - Production-Ready Configuration
-
-The goal of this phase is to make Backstage production-ready with persistent storage, monitoring, and advanced features.
-
 ### Step 1: Set Up Persistent Storage
-
 1. **Configure PostgreSQL database**:
-   - Set up a managed PostgreSQL instance or deploy to Kubernetes
-   - Configure Backstage to use the external database
-   - Set up backup and recovery procedures
-
 2. **Configure object storage for TechDocs**:
-   - Set up S3-compatible storage
-   - Configure Backstage to use external storage for TechDocs
 
 ### Step 2: Implement Monitoring and Observability
-
-1. **Set up health checks**:
-   - Configure Backstage health check endpoints
-   - Set up monitoring for these endpoints
-
-2. **Implement logging**:
-   - Configure structured logging
-   - Set up log aggregation and analysis
-
-3. **Set up metrics**:
-   - Configure Prometheus metrics
-   - Set up Grafana dashboards
+1. **Implement logging**:
+2. **Set up metrics**:
 
 ### Step 3: Enhance Security
-
 1. **Implement proper secret management**:
-   - Set up Vault integration
-   - Move secrets from configuration files to Vault
-
 2. **Configure role-based access control**:
-   - Set up permission policies
-   - Configure access control for different user groups
+  - admin groups for backstage
 
 ### Step 4: Scale and Optimize
 
 1. **Configure horizontal scaling**:
-   - Set up autoscaling for Backstage components
-   - Optimize resource requests and limits
-
 2. **Implement caching**:
-   - Set up Redis or similar for caching
-   - Configure Backstage to use the cache
 
 ### Step 5: Advanced Features
 
 1. **Implement Microsoft Entra Tenant Data integration**:
-   - Configure the Microsoft Entra provider
-   - Set up automatic user and group synchronization
-
 2. **Set up advanced search**:
-   - Configure Elasticsearch or similar
-   - Set up search indexing for all resources
 
 ## Conclusion
 
 Following this playbook will help you implement Backstage in a structured and progressive manner. Each phase builds upon the previous one, allowing you to demonstrate value early while working towards a production-ready deployment.
 
-Remember that Backstage is highly customizable, and you should adapt this playbook to your organization's specific needs and constraints.
+Remember that Backstage is highly customizable, and you should adapt this playbook to your client's specific needs and constraints.
 
 ## References
 
