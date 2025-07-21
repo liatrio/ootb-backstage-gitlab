@@ -1,5 +1,4 @@
-import React from 'react';
-import { Navigate, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { apiDocsPlugin, ApiExplorerPage } from '@backstage/plugin-api-docs';
 import {
   CatalogEntityPage,
@@ -10,7 +9,7 @@ import {
   CatalogImportPage,
   catalogImportPlugin,
 } from '@backstage/plugin-catalog-import';
-import { ScaffolderPage, scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { scaffolderPlugin, ScaffolderPage, ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder';
 import { orgPlugin } from '@backstage/plugin-org';
 import { SearchPage } from '@backstage/plugin-search';
 import {
@@ -25,6 +24,7 @@ import { apis } from './apis';
 import { entityPage } from './components/catalog/EntityPage';
 import { searchPage } from './components/search/SearchPage';
 import { Root } from './components/Root';
+import HomePage from './components/HomePage';
 
 import {
   AlertDisplay,
@@ -36,12 +36,8 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
-import { HomepageCompositionRoot } from '@backstage/plugin-home';
-import { HomePage } from './components/home/HomePage';
-
-// Added to enable GitLab authentication
 import { gitlabAuthApiRef } from '@backstage/core-plugin-api';
-
+import { GitLabCredentialFieldExtension } from './scaffolder/fields';
 
 const app = createApp({
   apis,
@@ -62,34 +58,28 @@ const app = createApp({
       catalogIndex: catalogPlugin.routes.catalogIndex,
     });
   },
-  // Added GitLab auth provider to the app configuration
-    components: {
+  components: {
     SignInPage: props => (
       <SignInPage
         {...props}
         auto
-        provider={{
-          id: 'gitlab-auth-provider',
+        providers={[
+          {
+          id: 'gitlab',
           title: 'GitLab',
           message: 'Sign in using GitLab',
           apiRef: gitlabAuthApiRef,
-        }}
+        },
+        'guest'
+      ]}
       />
     ),
   },
 });
-// Original sign in page configuration for reference
-//   components: {
-//     SignInPage: props => <SignInPage {...props} auto providers={['guest']} />,
-//   },
-// });
 
 const routes = (
   <FlatRoutes>
-    <Route path="/" element={<HomepageCompositionRoot />}>
-      <HomePage />
-    </Route>
-    <Route path="/" element={<Navigate to="catalog" />} />
+    <Route path="/" element={<HomePage />} />
     <Route path="/catalog" element={<CatalogIndexPage />} />
     <Route
       path="/catalog/:namespace/:kind/:name"
@@ -106,7 +96,21 @@ const routes = (
         <ReportIssue />
       </TechDocsAddons>
     </Route>
-    <Route path="/create" element={<ScaffolderPage />} />
+    <Route
+  path="/create"
+  element={
+    <ScaffolderPage
+      headerOptions={{
+        title: "Run a Template",
+        subtitle: "Use supported templates to create new GitLab repositories, open merge requests in existing repositories, or perform a task."
+      }}
+    >
+      <ScaffolderFieldExtensions>
+        <GitLabCredentialFieldExtension />
+      </ScaffolderFieldExtensions>
+    </ScaffolderPage>
+  }
+/>
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route
       path="/catalog-import"

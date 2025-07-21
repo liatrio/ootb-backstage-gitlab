@@ -1,5 +1,5 @@
-import React from 'react';
 import { Button, Grid } from '@material-ui/core';
+import { EntityCicdStatisticsContent } from '@backstage-community/plugin-cicd-statistics';
 import {
   EntityApiDefinitionCard,
   EntityConsumedApisCard,
@@ -55,13 +55,8 @@ import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 
 import {
-  EntityKubernetesContent,
-  isKubernetesAvailable,
-} from '@backstage/plugin-kubernetes';
-
-import {
-    isGitlabAvailable,
-    EntityGitlabContent,
+  isGitlabAvailable,
+  EntityGitlabContent,
 } from '@immobiliarelabs/backstage-plugin-gitlab';
 
 const techdocsContent = (
@@ -83,7 +78,6 @@ const cicdContent = (
         <EntityGithubActionsContent />
       </EntitySwitch.Case>
      */}
-
     <EntitySwitch.Case>
       <EmptyState
         title="No CI/CD available for this entity"
@@ -155,17 +149,20 @@ const serviceEntityPage = (
     <EntityLayout.Route path="/" title="Overview">
       {overviewContent}
     </EntityLayout.Route>
+    <EntityLayout.Route
+      if={isGitlabAvailable}
+      path="/gitlab"
+      title="Gitlab"
+    >
+    <EntityGitlabContent />
+    </EntityLayout.Route>
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route
-      path="/kubernetes"
-      title="Kubernetes"
-      if={isKubernetesAvailable}
-    >
-      <EntityKubernetesContent />
+    <EntityLayout.Route path="/cicd-statistics" title="CI/CD Statistics">
+      <EntityCicdStatisticsContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
@@ -193,14 +190,6 @@ const serviceEntityPage = (
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
     </EntityLayout.Route>
-
-    <EntityLayout.Route
-            if={isGitlabAvailable}
-            path="/gitlab"
-            title="Gitlab"
-        >
-        <EntityGitlabContent />
-    </EntityLayout.Route>
   </EntityLayout>
 );
 
@@ -209,17 +198,21 @@ const websiteEntityPage = (
     <EntityLayout.Route path="/" title="Overview">
       {overviewContent}
     </EntityLayout.Route>
+    
+    <EntityLayout.Route
+      if={isGitlabAvailable}
+      path="/gitlab"
+      title="Gitlab"
+    >
+    <EntityGitlabContent />
+    </EntityLayout.Route>
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route
-      path="/kubernetes"
-      title="Kubernetes"
-      if={isKubernetesAvailable}
-    >
-      <EntityKubernetesContent />
+    <EntityLayout.Route path="/cicd-statistics" title="CI/CD Statistics">
+      <EntityCicdStatisticsContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
@@ -235,14 +228,6 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
-    </EntityLayout.Route>
-
-    <EntityLayout.Route
-        if={isGitlabAvailable}
-        path="/gitlab"
-        title="Gitlab"
-    >
-        <EntityGitlabContent />
     </EntityLayout.Route>
   </EntityLayout>
 );

@@ -1,0 +1,65 @@
+app:
+  baseUrl: https://dev.devportal.company.com/
+
+backend:
+  baseUrl: https://dev.devportal.company.com/
+  listen:
+    port: 7008
+  auth:
+    dangerouslyDisableDefaultAuthPolicy: true
+  csp:
+    connect-src: ["'self'", 'https:']
+  securityHeaders:
+    strictTransportSecurity: "max-age=15552000; includeSubDomains"
+  # Configure CORS for both external and internal access
+  cors:
+    origin: [https://dev.devportal.company.com/, http://localhost:7008]
+
+auth:
+  allowGuestAccess: true
+  providers:
+    gitlab:
+      # Once we have Entra Auth enabled, we can remove below key 'development'. Required only for Local development.
+      development:
+        clientId: ${GITLAB_CLIENT_ID}
+        clientSecret: ${GITLAB_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: emailMatchingUserEntityProfileEmail
+    guest: {}
+  # Once we have Entra Auth enabled, we can remove below key 'development'. Required only for Local development.
+  environment: development
+  session:
+    secret: '${BACKEND_SECRET}'
+
+catalog:
+  # Use correct paths for catalog entities in the container
+  locations:
+    # Backstage entity schema
+    - type: file
+      target: ./company/entity-schema/catalog-info.yaml
+      rules:
+        - allow: [Component]
+
+    - type: file
+      target: ./company/sdp.yaml
+      rules:
+        - allow: [Domain, System, Group, User]
+
+    - type: file
+      target: ./company/gitlab-users.yaml
+      rules:
+        - allow: [User]
+      schedule:
+        frequency: { minutes: 120 }
+        timeout: { minutes: 10 }
+
+    # - type: url
+    #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/catalog-info.yaml?ref_type=heads
+    #   rules:
+    #     - allow: [Component]
+
+    # - type: url
+    #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/templates.yaml?ref_type=heads
+    #   rules:
+    #     - allow: [Template]

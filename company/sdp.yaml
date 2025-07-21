@@ -1,0 +1,67 @@
+# Local Backstage Catalog Entities: Secure Delivery Platform
+# Contains entities not allowed by GitLab provider (Domain, Template)
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: secure-delivery-platform
+  title: Secure Delivery Platform
+  description: Domain for secure CI/CD and developer experience tooling.
+spec:
+  owner: sdp
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: elevate-devex
+  title: Elevate DevEx
+  description: The Elevate DevEx system, part of the Secure Delivery Platform, providing FlowKit and pipeline-components capabilities.
+spec:
+  owner: elevate-devex
+  domain: secure-delivery-platform
+  type: product
+
+---
+
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: sdp
+  title: Secure Delivery Platform
+  description: Parent group for all Secure Delivery Platform teams
+spec:
+  type: team
+  profile:
+    displayName: Secure Delivery Platform
+    email: sdp@example.com
+  children: [elevate-devex]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: elevate-devex
+  title: Elevate DevEx Team
+  description: Group representing the Elevate DevEx team
+spec:
+  type: team
+  parent: sdp
+  profile:
+    displayName: Elevate DevEx
+    email: elevate-devex@example.com
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: community
+  title: Community
+  description: Group representing the Community of contributors and users of the Secure Delivery Platform.
+spec:
+  type: team
+  profile:
+    displayName: Community
+    email: community@example.com
+  children: []
+---

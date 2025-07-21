@@ -1,0 +1,4 @@
+site_name: "Entity Schema Guide"
+nav:
+  - Home: README.md
+  - Entity Schema Guide: entity-schema-docs.md

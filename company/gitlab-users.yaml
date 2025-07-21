@@ -1,0 +1,11 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: abeasley
+spec:
+  profile:
+    displayName: Amber Beasley
+    email: amber.beasley@liatrio.com
+  memberOf: []
+---

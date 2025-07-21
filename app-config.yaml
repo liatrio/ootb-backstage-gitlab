@@ -1,118 +1,83 @@
 app:
-  title: Scaffolded Backstage App
-  baseUrl: http://localhost:3000
+  title: liatrio ootb GitLab Backstage
+  baseUrl:
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#app.baseUrl
 
 organization:
-  name: My Company
+  name: liatrio ootb
 
 backend:
-  # Used for enabling authentication, secret is shared by all backend plugins
-  # See https://backstage.io/docs/auth/service-to-service-auth for
-  # information on the format
-  # auth:
-  #   keys:
-  #     - secret: ${BACKEND_SECRET}
-  baseUrl: http://localhost:7007
+  baseUrl:
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.baseUrl
   listen:
-    port: 7007
-    # Uncomment the following host directive to bind to specific interfaces
-    # host: 127.0.0.1
+    port:
+      $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.listen.port
+  auth:
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.auth
+  # Disable upgrade-insecure-requests to prevent SSL errors
   csp:
-    connect-src: ["'self'", 'http:', 'https:']
-    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
-    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
-  cors:
-    origin: http://localhost:3000
-    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
-    credentials: true
-  # This is for local development only, it is not recommended to use this in production
-  # The production database configuration is stored in app-config.production.yaml
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.csp
+  securityHeaders:
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.securityHeaders
+  # Use in-memory SQLite for local development
   database:
     client: better-sqlite3
     connection: ':memory:'
-  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+  # Configure CORS for both external and internal access
+  cors:
+    origin:
+      $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#backend.cors.origin
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+
+auth:
+  $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#auth
+
+proxy:
+  endpoints:
+    '/gitlab/api':
+      target: https://gitlab.com/api/v4
+
+techdocs:
+  builder: 'local' # Alternatives - 'external'
+  generator:
+    runIn: 'local' # Alternatives - 'docker'
+  publisher:
+    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
+
+gitlab:
+  # immobiliare/backstage-plugin-gitlab plugin config
+  defaultCodeOwnersPath: .gitlab/CODEOWNERS
+  defaultReadmePath: .gitlab/README.md
+  allowedKinds: ['Component', 'Resource']
+  proxySecure: false
+  useOAuth: true
+  cache:
+    enabled: true
+    ttl: 300
 
 integrations:
   gitlab:
     - host: gitlab.com
-      apiBaseUrl: https://gitlab.com/api/v4
-      token: ${GITLAB_TOKEN}
-
-proxy:
-  ### Example for how to add a proxy endpoint for the frontend.
-  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
-  # endpoints:
-  #   '/test':
-  #     target: 'https://example.com'
-  #     changeOrigin: true
-
-# Reference documentation http://backstage.io/docs/features/techdocs/configuration
-# Note: After experimenting with basic setup, use CI/CD to generate docs
-# and an external cloud storage when deploying TechDocs for production use-case.
-# https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
-techdocs:
-  builder: 'local' # Alternatives - 'external'
-  generator:
-    runIn: 'docker' # Alternatives - 'local'
-  publisher:
-    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
-
-auth:
-  environment: development
-  providers:
-    gitlab:
-      development:
-        clientId: ${AUTH_GITLAB_CLIENT_ID}
-        clientSecret: ${AUTH_GITLAB_CLIENT_SECRET}
-        signIn:
-          resolvers:
-            - resolver: usernameMatchingUserEntityName
-    # See https://backstage.io/docs/auth/guest/provider
-    #guest: {}
+      token: ${BACKSTAGE_GITLAB_TOKEN}
 
 scaffolder:
-  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+  actions:
+    $all:
+      useUserCredential: true
 
 catalog:
-  import:
-    entityFilename: catalog-info.yaml
-    pullRequestBranchName: backstage-integration
-  rules:
-    - allow: [Component, System, API, Resource, Location]
+  providers:
+    # by default only Component, API, System are allowed from providers
+    gitlab:
+      liatrio:
+        host: gitlab.com
+        group: liatrioinc/client-solutions
+        branch: main
+        include_subgroups: true
+        schedule:
+          frequency: { minutes: 30 }
+          timeout: { minutes: 10 }
+
   locations:
-    # Local example data, file locations are relative to the backend process, typically `packages/backend`
-    - type: file
-      target: ../../examples/entities.yaml
-
-    # Local example template
-    - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
-
-    # Local example organizational data
-    - type: file
-      target: ../../examples/org.yaml
-      rules:
-        - allow: [User, Group]
-
-    ## Uncomment these lines to add more example data
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
-
-    ## Uncomment these lines to add an example org
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
-    #   rules:
-    #     - allow: [User, Group]
-  # Experimental: Always use the search method in UrlReaderProcessor.
-  # New adopters are encouraged to enable it as this behavior will be the default in a future release.
-  useUrlReadersSearch: true
-
-kubernetes:
-  # see https://backstage.io/docs/features/kubernetes/configuration for kubernetes configuration options
-
-# see https://backstage.io/docs/permissions/getting-started for more on the permission framework
-permission:
-  # setting this to `false` will disable permissions
-  enabled: true
+    $include: app-config.${BACKSTAGE_ENVIRONMENT}.yaml#catalog.locations

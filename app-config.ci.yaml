@@ -1,0 +1,59 @@
+app:
+  baseUrl: http://localhost:7008
+
+backend:
+  baseUrl: http://localhost:7008
+  listen:
+    port: 7008
+  auth:
+    dangerouslyDisableDefaultAuthPolicy: true
+  csp:
+    upgrade-insecure-requests: false
+  securityHeaders:
+    strictTransportSecurity: ''
+  cors:
+    origin: http://localhost:7008
+
+auth:
+  # Add this to enable the guest sign-in page
+  allowGuestAccess: true
+  # Enable guest auth for local development
+  providers:
+    guest: {}
+  # Enable legacy guest mode as a fallback
+  legacyGuestToken: 'guest'
+  environment: development
+  session:
+    secret: '${BACKEND_SECRET}'
+
+catalog:
+  # Use correct paths for catalog entities in the container
+  locations:
+    # Backstage entity schema
+    - type: file
+      target: ./company/entity-schema/catalog-info.yaml
+      rules:
+        - allow: [Component]
+
+    - type: file
+      target: ./company/sdp.yaml
+      rules:
+        - allow: [Domain, System, Group, User]
+
+    - type: file
+      target: ./company/gitlab-users.yaml
+      rules:
+        - allow: [User]
+      schedule:
+        frequency: { minutes: 120 }
+        timeout: { minutes: 10 }
+
+    # - type: url
+    #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/catalog-info.yaml?ref_type=heads
+    #   rules:
+    #     - allow: [Component]
+
+    # - type: url
+    #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/templates.yaml?ref_type=heads
+    #   rules:
+    #     - allow: [Template]

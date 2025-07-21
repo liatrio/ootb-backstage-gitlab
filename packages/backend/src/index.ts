@@ -8,17 +8,12 @@
 
 import { createBackend } from '@backstage/backend-defaults';
 
-import {
-    gitlabPlugin,
-    catalogPluginGitlabFillerProcessorModule,
-} from '@immobiliarelabs/backstage-plugin-gitlab-backend';
-
 const backend = createBackend();
 
 backend.add(import('@backstage/plugin-app-backend'));
 backend.add(import('@backstage/plugin-proxy-backend'));
-backend.add(import('@backstage/plugin-scaffolder-backend'));
 backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
+backend.add(import('@backstage/plugin-scaffolder-backend-module-gitlab'));
 backend.add(import('@backstage/plugin-techdocs-backend'));
 
 // auth plugin
@@ -54,12 +49,23 @@ backend.add(import('@backstage/plugin-search-backend-module-pg'));
 backend.add(import('@backstage/plugin-search-backend-module-catalog'));
 backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
-// kubernetes
-backend.add(import('@backstage/plugin-kubernetes-backend'));
+// GitLab catalog provider
+backend.add(import('@backstage/plugin-catalog-backend-module-gitlab'));
 
-// added the following to support the GitLab integration
+// scaffolder plugin
+backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
+backend.add(import('@roadiehq/scaffolder-backend-module-http-request'));
+backend.add(import('@roadiehq/scaffolder-backend-module-utils'));
+
+// GitLab auth provider
 backend.add(import('@backstage/plugin-auth-backend-module-gitlab-provider'));
 
+// GitLab Project info
+// packages/backend/src/index.ts
+import {
+  gitlabPlugin,
+  catalogPluginGitlabFillerProcessorModule,
+} from '@immobiliarelabs/backstage-plugin-gitlab-backend';
 backend.add(gitlabPlugin);
 backend.add(catalogPluginGitlabFillerProcessorModule);
 

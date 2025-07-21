@@ -1,7 +1,10 @@
-import React, { PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import { makeStyles } from '@material-ui/core';
 import HomeIcon from '@material-ui/icons/Home';
-import ExtensionIcon from '@material-ui/icons/Extension';
+import CloudIcon from '@material-ui/icons/Cloud';
+import BuildIcon from '@material-ui/icons/Build';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import { MenuBook, Support, TravelExplore } from '@mui/icons-material';
 import LibraryBooks from '@material-ui/icons/LibraryBooks';
 import CreateComponentIcon from '@material-ui/icons/AddCircleOutline';
 import LogoFull from './LogoFull';
@@ -66,15 +69,21 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
       <SidebarDivider />
       <SidebarGroup label="Menu" icon={<MenuIcon />}>
         {/* Global nav, not org-specific */}
-        <SidebarItem icon={HomeIcon} to="catalog" text="Home" />
+        <SidebarItem icon={HomeIcon} to="/" text="Home" />
+        <SidebarItem icon={LibraryBooks} to="/catalog" text="Catalog" />
+        <SidebarItem icon={BuildIcon} to="catalog?filters[kind]=component&filters[tags]=pipeline-components" text="pipeline-components" />
+        <SidebarItem icon={RocketLaunchIcon} to="catalog?filters[kind]=template&filters[tags]=flowkit" text="FlowKit" />
+        <SidebarItem icon={CloudIcon} to="catalog?filters[kind]=component&filters[tags]=ek8s" text="EK8s" />
+        <SidebarItem icon={MenuBook} to="docs?filters[tags]=handbook" text="Handbooks" />
+        <SidebarItem icon={TravelExplore} to="catalog?filters[kind]=system" text="Systems" />
         <MyGroupsSidebarItem
           singularTitle="My Group"
           pluralTitle="My Groups"
           icon={GroupIcon}
         />
-        <SidebarItem icon={ExtensionIcon} to="api-docs" text="APIs" />
         <SidebarItem icon={LibraryBooks} to="docs" text="Docs" />
         <SidebarItem icon={CreateComponentIcon} to="create" text="Create..." />
+        <SidebarItem icon={Support} to="docs?filters[tags]=handbook&filters[tags]=help" text="Help" />
         {/* End global nav */}
         <SidebarDivider />
         <SidebarScrollWrapper>

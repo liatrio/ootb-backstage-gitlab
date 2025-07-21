@@ -1,0 +1,7 @@
+site_name: Entity Schema Guide
+docs_dir: docs
+nav:
+  - Home: README.md
+  - Entity Schema Guide: entity-schema-docs.md
+plugins:
+  - techdocs-core

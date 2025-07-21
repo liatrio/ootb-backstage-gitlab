@@ -1,0 +1,41 @@
+build-backstage:
+  tags:
+    - general
+  image: registry.gitlab.com/<company>/pipeline-components/containers/nodejs-20:1.0.0
+  stage: build
+  variables:
+    BACKSTAGE_ENVIRONMENT: ci
+  script:
+    - yarn install --immutable
+    - yarn tsc
+    - yarn build:all
+  artifacts:
+    paths:
+      - packages/backend/dist/skeleton.tar.gz
+      - packages/backend/dist/bundle.tar.gz
+
+include:
+  - component: $CI_SERVER_FQDN/<company>/pipeline-components/components/pipeline-components-general-util/semantic-release@0.2.0
+    inputs:
+      job_suffix: -dryrun
+      dry_run: true
+
+  - component: $CI_SERVER_FQDN/<company>/pipeline-components/components/pipeline-components-general-util/docker-package@fix/docker-package-build-args
+    inputs:
+      stage: publish
+      needs: [build-backstage, create-release-dryrun]
+      docker_build_args: "BACKSTAGE_GITLAB_TOKEN=$BACKSTAGE_GITLAB_TOKEN"
+
+  - component: $CI_SERVER_FQDN/<company>/pipeline-components/components/pipeline-components-general-util/semantic-release@0.2.0
+    inputs:
+      stage: release
+
+stages:
+    - build
+    - publish
+    - release
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'

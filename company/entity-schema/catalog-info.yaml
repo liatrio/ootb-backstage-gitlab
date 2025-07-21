@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: entity-schema
+  title: Entity Schema
+  description: Guide for authoring Backstage entities and catalog-info.yaml files at <company>.
+  tags:
+    - handbook
+    - backstage
+    - help
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: documentation
+  owner: elevate-devex
+  lifecycle: production
