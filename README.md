@@ -78,7 +78,7 @@ source .techdocs-venv/bin/activate
 Install the same mkdocs dependencies as the Dockerfile:
 
 ```bash
-pip install --no-cache-dir mkdocs-techdocs-core==1.* mkdocs-mermaid2-plugin
+pip install --no-cache-dir mkdocs-techdocs-core mkdocs-mermaid2-plugin
 ```
 
 **4. Start Backstage as Usual**
