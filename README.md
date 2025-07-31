@@ -32,12 +32,20 @@ You can run on your machine or in a container.
 
 > from root of repo <compnay>-backstage
 
+### environment variables
+
+> to start, you must set the following environment variables, but will later define more:
+
+```.env
+BACKSTAGE_ENVIRONMENT=local
+NODE_OPTIONS=--no-node-snapshot
+```
+
 ### Machine
 
 1. Install dependencies:
 
 ```bash
-export BACKSTAGE_ENVIRONMENT=local
 yarn install --immutable
 yarn tsc
 ```

@@ -58,6 +58,11 @@ catalog:
         frequency: { minutes: 120 }
         timeout: { minutes: 10 }
 
+    - type: url
+      target: https://gitlab.com/liatrioinc/client-solutions/backstage/backstage-add-java-pipeline-template/-/blob/main/template.yaml?ref_type=heads
+      rules:
+        - allow: [Template]
+
     # - type: url
     #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/templates.yaml?ref_type=heads
     #   rules:
