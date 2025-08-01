@@ -63,6 +63,11 @@ catalog:
       rules:
         - allow: [Template]
 
+    - type: file
+      target: ./../../catalog-info.yaml
+      rules:
+        - allow: [Component]
+
     # - type: url
     #   target: https://gitlab.com/<company>/ccis/tech-infrastructure-can/sdp/elevate-devx/backstage/backstage-template-list/-/blob/main/templates.yaml?ref_type=heads
     #   rules:
