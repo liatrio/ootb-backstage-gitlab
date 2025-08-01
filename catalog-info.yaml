@@ -14,5 +14,5 @@ metadata:
     - playbook
 spec:
   type: website
-  owner: amber.beasley@liatrio.com
+  owner: liatrio-team-members
   lifecycle: tape
